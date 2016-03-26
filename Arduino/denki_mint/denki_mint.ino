@@ -10,34 +10,30 @@ String url = "/update";
 String msg = "I need water!";
 Constant constant = Constant();
 
-void setup() {
-  Serial.begin(115200);  
-
-  // initialize serial communication at 9600 bits per second:
-  //Serial.begin(9600);
-  Serial.begin(115200);
-  pinMode(13, OUTPUT);
+void connect_wifi(char* ssid, char* password) {
 
   delay(10);
-
-  // We start by connecting to a WiFi network
-
-  Serial.println();
   Serial.println();
   Serial.print("Connecting to ");
-  Serial.println(constant.ssid);
+  Serial.println(ssid);
   
-  WiFi.begin(constant.ssid, constant.password);
+  WiFi.begin(ssid, password);
   
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
 
-  Serial.println("");
+  Serial.println();
   Serial.println("WiFi connected");  
-  Serial.println("IP address: ");
+  Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+}
+
+void setup() {
+  Serial.begin(115200);  
+  pinMode(13, OUTPUT);
+  connect_wifi(constant.ssid, constant.password);
 }
 
 // the loop routine runs over and over again forever:
@@ -69,28 +65,28 @@ void loop() {
     
     WiFiClient client;
     const int httpPort = 80;
-    if (!client.connect(host, httpPort)) {
-      Serial.println("connection failed");
-      return;
-    }
-    
-    // We now create a URI for the request  
-    Serial.print("Requesting URL: ");
-    Serial.println(url);
-
-    String mud_status = " 土の状態: " + String(sensorValue);
-    String comment = msg + mud_status;
-    String comment_length = String(comment.length() + constant.token.length() + 14);
-    Serial.println(comment);
+//    if (!client.connect(host, httpPort)) {
+//      Serial.println("connection failed");
+//      return;
+//    }
+//    
+//    // We now create a URI for the request  
+//    Serial.print("Requesting URL: ");
+//    Serial.println(url);
+//
+//    String mud_status = " 土の状態: " + String(sensorValue);
+//    String comment = msg + mud_status;
+//    String comment_length = String(comment.length() + constant.token.length() + 14);
+//    Serial.println(comment);
     
     // This will send the request to the server
-    client.print(String("POST ") + url + " HTTP/1.1\r\n" +
-                 "Host: " + host + "\r\n" + 
-                 "Content-Length: " + comment_length + "\r\n" + 
-                 "\r\n" + 
-                 "token=" + constant.token +
-                 "&status=" + comment + "\r\n" + 
-                 "Connection: close\r\n\r\n");
+//    client.print(String("POST ") + url + " HTTP/1.1\r\n" +
+//                 "Host: " + host + "\r\n" + 
+//                 "Content-Length: " + comment_length + "\r\n" + 
+//                 "\r\n" + 
+//                 "token=" + constant.token +
+//                 "&status=" + comment + "\r\n" + 
+//                 "Connection: close\r\n\r\n");
   
     delay(10);
     
