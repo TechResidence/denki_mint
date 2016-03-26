@@ -2,18 +2,16 @@
   Deknki Mint Water Pourer
 */
 
+#include "Constant.h"
 #include <ESP8266WiFi.h>
-
-const char* ssid     = "xxxxxxxx";
-const char* password = "xxxxxxxx";
 
 const char* host = "arduino-tweet.appspot.com";
 String url = "/update";
-char msg[] = "I need water!";
-char token[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-String contentlen = String(strlen(msg) + strlen(token) + 14);
+String msg = "I need water!";
+Constant constant = Constant();
 
 void setup() {
+  Serial.begin(115200);  
 
   // initialize serial communication at 9600 bits per second:
   //Serial.begin(9600);
@@ -27,9 +25,9 @@ void setup() {
   Serial.println();
   Serial.println();
   Serial.print("Connecting to ");
-  Serial.println(ssid);
+  Serial.println(constant.ssid);
   
-  WiFi.begin(ssid, password);
+  WiFi.begin(constant.ssid, constant.password);
   
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -82,14 +80,15 @@ void loop() {
 
     String mud_status = " 土の状態: " + String(sensorValue);
     String comment = msg + mud_status;
+    String comment_length = String(comment.length() + constant.token.length() + 14);
     Serial.println(comment);
     
     // This will send the request to the server
     client.print(String("POST ") + url + " HTTP/1.1\r\n" +
                  "Host: " + host + "\r\n" + 
-                 "Content-Length: " + contentlen + "\r\n" + 
+                 "Content-Length: " + comment_length + "\r\n" + 
                  "\r\n" + 
-                 "token=" + token +
+                 "token=" + constant.token +
                  "&status=" + comment + "\r\n" + 
                  "Connection: close\r\n\r\n");
   
