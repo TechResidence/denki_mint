@@ -7,7 +7,6 @@
 
 const char* host = "arduino-tweet.appspot.com";
 String url = "/update";
-String msg = "I need water!";
 Constant constant = Constant();
 
 void connect_wifi(char* ssid, char* password) {
@@ -28,6 +27,50 @@ void connect_wifi(char* ssid, char* password) {
   Serial.println("WiFi connected");  
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+}
+
+String payload(const char* host, String url, String token, String comment) {
+    String content_length = String(token.length() + comment.length() + 14);
+    Serial.println(comment);
+
+    return String("POST ") + url + " HTTP/1.1\r\n" +
+      "Host: " + host + "\r\n" + 
+      "Content-Length: " + content_length + "\r\n" + 
+      "\r\n" + 
+      "token=" + token +
+      "&status=" + comment + "\r\n" + 
+      "Connection: close\r\n\r\n";
+}
+
+void tweet(const char* host, String url, String token, String comment) {
+
+    delay(5000);  
+    Serial.print("connecting to ");
+    Serial.println(host);
+    
+    WiFiClient client;
+    const int httpPort = 80;
+    if (!client.connect(host, httpPort)) {
+      Serial.println("connection failed");
+      return;
+    }
+    
+    // We now create a URI for the request  
+    Serial.print("Requesting URL: ");
+    Serial.println(url);
+
+    // This will send the request to the server
+    String content = payload(host, url, token, comment);
+    client.print(content);
+    delay(10);
+
+    // Read all the lines of the reply from server and print them to Serial
+    while(client.available()){
+      String line = client.readStringUntil('\r');
+      Serial.print(line);
+    }
+    Serial.println();
+    Serial.println("closing connection");
 }
 
 void setup() {
@@ -55,52 +98,8 @@ void loop() {
     digitalWrite(13, LOW); // turn the LED off by making the voltage LOW
     delay(2000); // Give water few seconds
     digitalWrite(13, HIGH); // turn the LED on (HIGH is the voltage level)
-    
-    // =============================================
-    // Tweeeeeeeeeeeeeeeeeeeeeeeeeeeeeet
-    // 
-    delay(5000);  
-    Serial.print("connecting to ");
-    Serial.println(host);
-    
-    WiFiClient client;
-    const int httpPort = 80;
-//    if (!client.connect(host, httpPort)) {
-//      Serial.println("connection failed");
-//      return;
-//    }
-//    
-//    // We now create a URI for the request  
-//    Serial.print("Requesting URL: ");
-//    Serial.println(url);
-//
-//    String mud_status = " 土の状態: " + String(sensorValue);
-//    String comment = msg + mud_status;
-//    String comment_length = String(comment.length() + constant.token.length() + 14);
-//    Serial.println(comment);
-    
-    // This will send the request to the server
-//    client.print(String("POST ") + url + " HTTP/1.1\r\n" +
-//                 "Host: " + host + "\r\n" + 
-//                 "Content-Length: " + comment_length + "\r\n" + 
-//                 "\r\n" + 
-//                 "token=" + constant.token +
-//                 "&status=" + comment + "\r\n" + 
-//                 "Connection: close\r\n\r\n");
-  
-    delay(10);
-    
-    // Read all the lines of the reply from server and print them to Serial
-    while(client.available()){
-      String line = client.readStringUntil('\r');
-      Serial.print(line);
-    }
-    
-    Serial.println();
-    Serial.println("closing connection");
-  
-    // Tweet Finish!
-    // =============================================  
+    String comment = "I need water! 土の状態: " + String(sensorValue);
+    //tweet(host, url, constant.token, comment);
   }
   
   delay(1); // delay in between reads for stability
