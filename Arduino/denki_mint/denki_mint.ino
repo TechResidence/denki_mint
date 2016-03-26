@@ -2,12 +2,18 @@
   Deknki Mint Water Pourer
 */
 
-#include "Constant.h"
 #include <ESP8266WiFi.h>
+#include "Constant.h"
+Constant constant = Constant();
 
+// Tweet Library for Arduino
 const char* host = "arduino-tweet.appspot.com";
 String url = "/update";
-Constant constant = Constant();
+
+// sensorValue actual resutls:
+//   - Super dry mud: 350
+//   - Super wet mud: 670
+int threshold = 600;
 
 void connect_wifi(char* ssid, char* password) {
 
@@ -73,9 +79,16 @@ void tweet(const char* host, String url, String token, String comment) {
     Serial.println("closing connection");
 }
 
+void pour() {
+  digitalWrite(13, HIGH); // turn the LED on (HIGH is the voltage level)  
+  delay(2000); // Give water few seconds
+  digitalWrite(13, LOW); // turn the LED off by making the voltage LOW
+}
+
 void setup() {
-  Serial.begin(115200);  
+  Serial.begin(115200);
   pinMode(13, OUTPUT);
+  digitalWrite(13, LOW); // turn the LED off by making the voltage LOW
   connect_wifi(constant.ssid, constant.password);
 }
 
@@ -83,26 +96,19 @@ void setup() {
 void loop() {
   // read the input on analog pin 0:
   int sensorValue = analogRead(A0);
-  
-  // print out the value you read:
   Serial.println(sensorValue);
 
-  // sensorValue actual resutls:
-  //   - Super dry mud: 350
-  //   - Super wet mud: 670
-  if (sensorValue > 600) {
-    digitalWrite(13, HIGH); // turn the LED on (HIGH is the voltage level)
-    delay(10000); // Wait few seconds
-    
-  } else {
-    digitalWrite(13, LOW); // turn the LED off by making the voltage LOW
-    delay(2000); // Give water few seconds
-    digitalWrite(13, HIGH); // turn the LED on (HIGH is the voltage level)
+  if (sensorValue < threshold) {    
+    // pour water to mint
+    pour();
+
+    // tweet status
     String comment = "I need water! 土の状態: " + String(sensorValue);
-    //tweet(host, url, constant.token, comment);
+    tweet(host, url, constant.token, comment);
   }
   
   delay(1); // delay in between reads for stability
-  delay(10000); // Wait few seconds
+  delay(10000); // Wait few seconds for mint drinking water
+
 }
 
