@@ -79,6 +79,10 @@ void loop() {
     // We now create a URI for the request  
     Serial.print("Requesting URL: ");
     Serial.println(url);
+
+    String mud_status = " 土の状態: " + String(sensorValue);
+    String comment = msg + mud_status;
+    Serial.println(comment);
     
     // This will send the request to the server
     client.print(String("POST ") + url + " HTTP/1.1\r\n" +
@@ -86,7 +90,7 @@ void loop() {
                  "Content-Length: " + contentlen + "\r\n" + 
                  "\r\n" + 
                  "token=" + token +
-                 "&status=" + msg + "\r\n" + 
+                 "&status=" + comment + "\r\n" + 
                  "Connection: close\r\n\r\n");
   
     delay(10);
