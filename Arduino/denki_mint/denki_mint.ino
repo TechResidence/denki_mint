@@ -106,7 +106,24 @@ void loop() {
     String comment = "I need water! 土の状態: " + String(sensorValue);
     tweet(host, url, constant.token, comment);
   }
-  
+  else {
+    // tweet status
+    String comment = "I'm fine :D 土の状態: " + String(sensorValue);
+    tweet(host, url, constant.token, comment);
+  }
+
+  //DEEP SLEEPモード突入命令
+  Serial.println("DEEP SLEEP START!!");
+
+  //1:μ秒での復帰までのタイマー時間設定  2:復帰するきっかけの設定（モード設定）
+  ESP.deepSleep(30 * 1000 * 1000 , WAKE_RF_DEFAULT);
+
+  //deepsleepモード移行までのダミー命令
+  delay(1000);
+
+  //実際にはこの行は実行されない
+  Serial.println("DEEP SLEEPing....");
+
   delay(1); // delay in between reads for stability
   delay(10000); // Wait few seconds for mint drinking water
 
