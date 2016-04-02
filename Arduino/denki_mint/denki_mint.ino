@@ -90,10 +90,7 @@ void setup() {
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW); // turn the LED off by making the voltage LOW
   connect_wifi(constant.ssid, constant.password);
-}
 
-// the loop routine runs over and over again forever:
-void loop() {
   // read the input on analog pin 0:
   int sensorValue = analogRead(A0);
   Serial.println(sensorValue);
@@ -105,8 +102,7 @@ void loop() {
     // tweet status
     String comment = "I need water! 土の状態: " + String(sensorValue);
     tweet(host, url, constant.token, comment);
-  }
-  else {
+  } else {
     // tweet status
     String comment = "I'm fine :D 土の状態: " + String(sensorValue);
     tweet(host, url, constant.token, comment);
@@ -116,7 +112,7 @@ void loop() {
   Serial.println("DEEP SLEEP START!!");
 
   //1:μ秒での復帰までのタイマー時間設定  2:復帰するきっかけの設定（モード設定）
-  ESP.deepSleep(30 * 1000 * 1000 , WAKE_RF_DEFAULT);
+  ESP.deepSleep(3600 * 1000 * 1000 , WAKE_RF_DEFAULT);
 
   //deepsleepモード移行までのダミー命令
   delay(1000);
@@ -124,8 +120,11 @@ void loop() {
   //実際にはこの行は実行されない
   Serial.println("DEEP SLEEPing....");
 
-  delay(1); // delay in between reads for stability
-  delay(10000); // Wait few seconds for mint drinking water
+  // delay(1); // delay in between reads for stability
+  // delay(10000); // Wait few seconds for mint drinking water
+}
 
+// the loop routine runs over and over again forever:
+void loop() {
 }
 
