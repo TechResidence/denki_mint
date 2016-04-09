@@ -3,12 +3,13 @@
 */
 
 #include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
 #include "Constant.h"
 Constant constant = Constant();
 
 // Tweet Library for Arduino
-const char* host = "arduino-tweet.appspot.com";
-String url = "/update";
+const char* host = "maker.ifttt.com";
+String url = "/trigger/denki_mint/with/key/" + constant.token;
 
 // sensorValue actual resutls:
 //   - Super dry mud: 350
@@ -35,30 +36,35 @@ void connect_wifi(char* ssid, char* password) {
   Serial.println(WiFi.localIP());
 }
 
-String payload(const char* host, String url, String token, String comment) {
-    String content_length = String(token.length() + comment.length() + 14);
+String payload(const char* host, String url, String comment) {
+    String content_length = String(comment.length() + 7);
     Serial.println(comment);
 
     return String("POST ") + url + " HTTP/1.1\r\n" +
       "Host: " + host + "\r\n" + 
       "Content-Length: " + content_length + "\r\n" + 
-      "\r\n" + 
-      "token=" + token +
-      "&status=" + comment + "\r\n" + 
+      "\r\n" +
+      "value1=" + comment + "\r\n" + 
       "Connection: close\r\n\r\n";
 }
 
-void tweet(const char* host, String url, String token, String comment) {
+void tweet(const char* host, String url, String comment) {
 
     delay(5000);  
     Serial.print("connecting to ");
     Serial.println(host);
     
-    WiFiClient client;
-    const int httpPort = 80;
-    if (!client.connect(host, httpPort)) {
+    WiFiClientSecure client;
+    const int httpsPort = 443;
+    if (!client.connect(host, httpsPort)) {
       Serial.println("connection failed");
       return;
+    }
+
+    if (client.verify(constant.fingerprint, host)) {
+      Serial.println("certificate matches");
+    } else {
+      Serial.println("certificate doesn't match");
     }
     
     // We now create a URI for the request  
@@ -66,7 +72,7 @@ void tweet(const char* host, String url, String token, String comment) {
     Serial.println(url);
 
     // This will send the request to the server
-    String content = payload(host, url, token, comment);
+    String content = payload(host, url, comment);
     client.print(content);
     delay(10);
 
@@ -101,27 +107,18 @@ void setup() {
 
     // tweet status
     String comment = "I need water! 土の状態: " + String(sensorValue);
-    tweet(host, url, constant.token, comment);
+    tweet(host, url, comment);
   } else {
     // tweet status
     String comment = "I'm fine :D 土の状態: " + String(sensorValue);
-    tweet(host, url, constant.token, comment);
+    tweet(host, url, comment);
   }
 
-  //DEEP SLEEPモード突入命令
   Serial.println("DEEP SLEEP START!!");
-
-  //1:μ秒での復帰までのタイマー時間設定  2:復帰するきっかけの設定（モード設定）
   ESP.deepSleep(3600 * 1000 * 1000 , WAKE_RF_DEFAULT);
+  delay(1000); //deepsleepモード移行
+  Serial.println("DEEP sleeping....");
 
-  //deepsleepモード移行までのダミー命令
-  delay(1000);
-
-  //実際にはこの行は実行されない
-  Serial.println("DEEP SLEEPing....");
-
-  // delay(1); // delay in between reads for stability
-  // delay(10000); // Wait few seconds for mint drinking water
 }
 
 // the loop routine runs over and over again forever:
