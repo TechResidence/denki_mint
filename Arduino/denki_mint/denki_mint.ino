@@ -16,6 +16,13 @@ String url = "/trigger/denki_mint/with/key/" + constant.token;
 //   - Super wet mud: 670
 int threshold = 320;
 
+void deepsleep() {
+  Serial.println("DEEP SLEEP START!!");
+  ESP.deepSleep(3600 * 1000 * 1000 , WAKE_RF_DEFAULT);
+  delay(1000); //deepsleepモード移行
+  Serial.println("DEEP sleeping....");
+}
+
 void connect_wifi(char* ssid, char* password) {
 
   delay(10);
@@ -24,10 +31,15 @@ void connect_wifi(char* ssid, char* password) {
   Serial.println(ssid);
   
   WiFi.begin(ssid, password);
-  
+
+  int count = 0;
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
+    count++;
+    if (count > 50) {
+      deepsleep();
+    }
   }
 
   Serial.println();
@@ -36,19 +48,25 @@ void connect_wifi(char* ssid, char* password) {
   Serial.println(WiFi.localIP());
 }
 
-String payload(const char* host, String url, String comment) {
-    String content_length = String(comment.length() + 7);
-    Serial.println(comment);
+String send_data(const char* host, String url, String payload) {
+//  String data = String("POST ") + url + " HTTP/1.1\r\n" +
+//    "Host: " + host + "\r\n" +
+//    "Content-Length: " + payload.length() + "\r\n" +
+//    "\r\n" +
+//    payload + "\r\n" +
+//     "Connection: close\r\n\r\n";
+  String data = String("GET ") + url + "?" + payload + " HTTP/1.1\r\n" +
+    "Host: " + host + "\r\n" +
+    "Content-Length: " + payload.length() + "\r\n" +
+    "\r\n" +
+    "Connection: close\r\n\r\n";
 
-    return String("POST ") + url + " HTTP/1.1\r\n" +
-      "Host: " + host + "\r\n" + 
-      "Content-Length: " + content_length + "\r\n" + 
-      "\r\n" +
-      "value1=" + comment + "\r\n" + 
-      "Connection: close\r\n\r\n";
+  Serial.println(payload);  
+  Serial.println(data);
+  return data; 
 }
 
-void tweet(const char* host, String url, String comment) {
+void tweet(const char* host, String url, String payload) {
 
     delay(5000);  
     Serial.print("connecting to ");
@@ -72,7 +90,7 @@ void tweet(const char* host, String url, String comment) {
     Serial.println(url);
 
     // This will send the request to the server
-    String content = payload(host, url, comment);
+    String content = send_data(host, url, payload);
     client.print(content);
     delay(10);
 
@@ -106,19 +124,17 @@ void setup() {
     pour();
 
     // tweet status
-    String comment = "I need water! 土の状態: " + String(sensorValue);
-    tweet(host, url, comment);
+    String comment = "I%20need%20water!%20HP[" + String(sensorValue) + "]";
+    String payload = "value1=" + comment;
+    tweet(host, url, payload);
   } else {
     // tweet status
-    String comment = "I'm fine :D 土の状態: " + String(sensorValue);
-    tweet(host, url, comment);
+    String comment = "I%20am%20fine%20:D%20HP[" + String(sensorValue) + "]";
+    String payload = "value1=" + comment;
+    tweet(host, url, payload);
   }
 
-  Serial.println("DEEP SLEEP START!!");
-  ESP.deepSleep(3600 * 1000 * 1000 , WAKE_RF_DEFAULT);
-  delay(1000); //deepsleepモード移行
-  Serial.println("DEEP sleeping....");
-
+  deepsleep();
 }
 
 // the loop routine runs over and over again forever:
