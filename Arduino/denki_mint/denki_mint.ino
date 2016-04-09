@@ -13,7 +13,7 @@ String url = "/update";
 // sensorValue actual resutls:
 //   - Super dry mud: 350
 //   - Super wet mud: 670
-int threshold = 600;
+int threshold = 320;
 
 void connect_wifi(char* ssid, char* password) {
 
