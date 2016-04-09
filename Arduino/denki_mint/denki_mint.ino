@@ -112,7 +112,7 @@ void pour() {
 void setup() {
   Serial.begin(115200);
   pinMode(13, OUTPUT);
-  digitalWrite(13, LOW); // turn the LED off by making the voltage LOW
+  digitalWrite(13, LOW);
   connect_wifi(constant.ssid, constant.password);
 
   // read the input on analog pin 0:
@@ -124,7 +124,7 @@ void setup() {
     pour();
 
     // tweet status
-    String comment = "I%20need%20water!%20HP[" + String(sensorValue) + "]";
+    String comment = "I%20need%20water!%20HP[" + String(sensorValue) + "]";    mm
     String payload = "value1=" + comment;
     tweet(host, url, payload);
   } else {
