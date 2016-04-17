@@ -123,9 +123,8 @@ void setup() {
   if (sensorValue < threshold) {    
     // pour water to mint
     pour();
-
     // tweet status
-    String comment = "I%20need%20water!%20HP[" + String(sensorValue) + "]"; 
+    String comment = "I%20need%20water!%20HP[" + String(sensorValue) + "]";
     String payload = "value1=" + comment;
     tweet(host, url, payload);
   } else {
