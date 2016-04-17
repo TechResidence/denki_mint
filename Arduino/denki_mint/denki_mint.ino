@@ -10,11 +10,12 @@ Constant constant = Constant();
 // Tweet Library for Arduino
 const char* host = "maker.ifttt.com";
 String url = "/trigger/denki_mint/with/key/" + constant.token;
+int PIN = 15;
 
 // sensorValue actual resutls:
 //   - Super dry mud: 350
 //   - Super wet mud: 670
-int threshold = 320;
+int threshold = 512;
 
 void deepsleep() {
   Serial.println("DEEP SLEEP START!!");
@@ -104,15 +105,15 @@ void tweet(const char* host, String url, String payload) {
 }
 
 void pour() {
-  digitalWrite(13, HIGH); // turn the LED on (HIGH is the voltage level)  
-  delay(2000); // Give water few seconds
-  digitalWrite(13, LOW); // turn the LED off by making the voltage LOW
+  digitalWrite(PIN, HIGH); // turn the LED on (HIGH is the voltage level)  
+  delay(8000); // Give water few seconds
+  digitalWrite(PIN, LOW); // turn the LED off by making the voltage LOW
 }
 
 void setup() {
   Serial.begin(115200);
-  pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
+  pinMode(PIN, OUTPUT);
+  digitalWrite(PIN, LOW);
   connect_wifi(constant.ssid, constant.password);
 
   // read the input on analog pin 0:
@@ -124,7 +125,7 @@ void setup() {
     pour();
 
     // tweet status
-    String comment = "I%20need%20water!%20HP[" + String(sensorValue) + "]";    mm
+    String comment = "I%20need%20water!%20HP[" + String(sensorValue) + "]"; 
     String payload = "value1=" + comment;
     tweet(host, url, payload);
   } else {
